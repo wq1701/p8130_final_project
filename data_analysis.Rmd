@@ -5,5 +5,18 @@ output: html_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+library(psych)
+```
+
+
+
+```{r import data}
+lawsuit_df = read_csv("./data/Lawsuit.csv") %>% janitor::clean_names()
+```
+
+```{r descriptive stats}
+lawsuit_df %>% 
+  describeBy(., group = "gender")
 ```
 
