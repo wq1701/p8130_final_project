@@ -1,6 +1,6 @@
 ---
 title: "Data Exploration"
-output: html_document
+output: github_document
 ---
 
 ```{r setup, include=FALSE}
@@ -9,14 +9,61 @@ library(tidyverse)
 library(psych)
 ```
 
-
-
 ```{r import data}
 lawsuit_df = read_csv("./data/Lawsuit.csv") %>% janitor::clean_names()
+
+lawsuit_df = lawsuit_df %>% 
+  mutate(sum_sal = sal94 + sal95)
 ```
 
 ```{r descriptive stats}
 lawsuit_df %>% 
   describeBy(., group = "gender")
+
+
+# lawsuit_df %>% 
+#   gather(-id, -sum_sal, key = "var", value = "value") %>% 
+#   ggplot(aes(x = value, y = sum_sal)) + 
+#   geom_point() +
+#   facet_wrap(~var)
+
+
+lawsuit_df %>% 
+  ggplot(aes(x = prate, y = sum_sal)) + 
+  geom_point()
+
+lawsuit_df %>% 
+  ggplot(aes(x = exper, y = sum_sal)) + 
+  geom_point()
+
+lawsuit_df %>% 
+  ggplot(aes(x = rank, y = sum_sal)) + 
+  geom_violin() + 
+  facet_wrap(~rank)
+
+lawsuit_df %>% 
+  ggplot(aes(x = gender, y = sum_sal)) + 
+  geom_violin() + 
+  facet_wrap(~gender)
+
+# not normal
+lawsuit_df %>% 
+  ggplot(aes(sample = sum_sal)) + 
+  stat_qq() + 
+  stat_qq_line()
+
+# log transformation
+lawsuit_df %>% 
+  mutate(log_sal = log(sum_sal)) %>% 
+  ggplot(aes(sample = log_sal)) + 
+  stat_qq() + 
+  stat_qq_line()
+
+# sqrt transformation
+lawsuit_df %>% 
+  mutate(rt_sal = sqrt(sum_sal)) %>% 
+  ggplot(aes(sample = rt_sal)) + 
+  stat_qq() + 
+  stat_qq_line()
 ```
 
