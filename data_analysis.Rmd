@@ -67,3 +67,15 @@ lawsuit_df %>%
   stat_qq_line()
 ```
 
+
+
+```{r confounders interactions}
+# outcome: settle for sum_sal for now. 
+# main predictor: gender
+
+# fit model
+
+model = lm(sum_sal~gender + prate + exper + rank + dept, data = lawsuit_df)
+summary(model)
+```
+
