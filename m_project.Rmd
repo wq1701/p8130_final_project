@@ -35,7 +35,9 @@ theme_set(theme_minimal() + theme(legend.position = "bottom"))
 
 ```{r}
 law = read_csv("./data/Lawsuit.csv") %>%
-  dplyr::select(-ID)
+  mutate(Sal = (Sal94 + Sal95)/2) %>%
+  dplyr::select(-ID, -Sal94, -Sal95)
+
 law$Dept <- ifelse(law$Dept == 6, 0, ifelse(law$Dept != 6, law$Dept, NA))
 law$Rank <- ifelse(law$Rank == 3, 0, ifelse(law$Rank != 3, law$Rank, NA))
 
@@ -56,7 +58,7 @@ law_df = law %>%
          Cert = factor(Cert, levels = c(0,1), labels = c("not certified", "Board certified")),
          Rank = factor(Rank, levels = c(0,1,2), labels = c("Full professor", "Assistant", "Associate")))
 
-my_labels <- list(Dept = "Department", Gender = "Gender", Clin = "Research/Clinical emphasis", Cert = "Not/Board Certificated", Prate = "Publication rate", Exper = "Experience(years)", Rank = "Title", Sal94 = "Salary in 1994", Sal95 = "Salary in 1995")
+my_labels <- list(Dept = "Department", Gender = "Gender", Clin = "Research/Clinical emphasis", Cert = "Not/Board Certificated", Prate = "Publication rate", Exper = "Experience(years)", Rank = "Title", Sal = "Average Salary in 1994-1995")
 
 my_controls <- tableby.control(
   total = T,
@@ -70,7 +72,7 @@ my_controls <- tableby.control(
     range = "Min - Max",
     countpct = "N (%)"))
 
-tab1 <- tableby(Gender ~ Dept + Clin + Cert + Prate + Exper + Rank + Sal94 + Sal95, data = law_df, control = my_controls)
+tab1 <- tableby(Gender ~ Dept + Clin + Cert + Prate + Exper + Rank + Sal, data = law_df, control = my_controls)
 
 summary(tab1, title = "Summary by Gender", 
         labelTranslations = my_labels, text = T)
@@ -83,26 +85,23 @@ cor_mat = round(cor(law),2)
 
 
 par(mar = c(4,5,1,1))
-par(mfrow = c(1,2))
 cor(law_df[ ,c(5,6,8)]) %>% 
   corrplot(method = "circle", type = "upper", diag = FALSE)
-cor(law_df[ ,c(5,6,9)]) %>% 
-  corrplot(method = "circle", type = "upper", diag = FALSE)
 
-par(mfrow = c(2,2))
+
+par(mfrow = c(1,3))
 hist(law$Prate, xlab = "Publication rate", freq = T, col = 2)
 hist(law$Exper, xlab = "Experience years", freq = T, col = 2)
-hist(law$Sal94, xlab = "Salary in 1994", freq = T, col = 2)
-hist(law$Sal95, xlab = "Salary in 1995", freq = T, col = 2)
+hist(law$Sal, xlab = "Salary", freq = T, col = 2)
 
 exper_log = log(law$Exper)
-sal94_log = log(law$Sal94)
-sal95_log = log(law$Sal95)
-par(mfrow = c(2,2))
+sal_log = log(law$Sal)
+
+par(mfrow = c(1,3))
 hist(law$Prate, xlab = "Publication rate", freq = T, col = 2)
 hist(exper_log, xlab = "lm(Experience years)", freq = T, col = 2)
-hist(sal94_log, xlab = "lm(Salary in 1994)", freq = T, col = 2)
-hist(sal95_log, xlab = "lm(Salary in 1995)", freq = T, col = 2)
+hist(sal_log, xlab = "lm(Salary)", freq = T, col = 2)
+
 
 
 ```
@@ -111,20 +110,15 @@ hist(sal95_log, xlab = "lm(Salary in 1995)", freq = T, col = 2)
 law_trans = law_df %>%
   mutate(
     exper_log = log(law$Exper),
-    sal94_log = log(law$Sal94),
-    sal95_log = log(law$Sal95)
+    sal_log = log(law$Sal)
   ) %>% 
-  dplyr::select(-Exper, -Sal94, -Sal95)
+  dplyr::select(-Exper, -Sal)
 
 
-mult_fit94 = lm(sal94_log ~ Dept + Gender + Clin + Cert + Prate + Rank + exper_log, data = law_trans)
-step(mult_fit94, direction = 'backward')
-mult_fit94 = lm(sal94_log ~ Dept + Clin + Cert + Prate + Rank + exper_log, data = law_trans)
-summary(mult_fit94)
+mult_fit = lm(sal_log ~ Dept + Gender + Clin + Cert + Prate + Rank + exper_log, data = law_trans)
+step(mult_fit, direction = 'backward')
+mult_fit = lm(sal_log ~ Dept + Clin + Cert + Prate + Rank + exper_log, data = law_trans)
+summary(mult_fit)
 
-mult_fit95 = lm(sal95_log ~ Dept + Gender + Clin + Cert + Prate + Rank + exper_log, data = law_trans)
-step(mult_fit95, direction = 'backward')
-mult_fit95 = lm(sal95_log ~ Dept + Clin + Cert + Prate + Rank + exper_log, data = law_trans)
-summary(mult_fit95)
 
 ```
