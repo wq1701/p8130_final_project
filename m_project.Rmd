@@ -7,7 +7,6 @@ output: github_document
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(
   echo = TRUE,
-  results = 'asis',
   warning = FALSE,
   fig.width = 8,
   fig.height = 6,
@@ -33,7 +32,7 @@ theme_set(theme_minimal() + theme(legend.position = "bottom"))
 ```
 
 
-```{r}
+```{r, results = 'asis'}
 law = read_csv("./data/Lawsuit.csv") %>%
   mutate(Sal = (Sal94 + Sal95)/2) %>%
   dplyr::select(-ID, -Sal94, -Sal95)
@@ -130,6 +129,21 @@ female_sal = law_trans %>%
 female_model = lm(sal_log ~ dept + clin + cert + prate + rank + exper, data = female_sal)
 
 summary(female_model)
+```
 
+```{r}
+a = law_trans %>% 
+  janitor::clean_names() %>% 
+  group_by(gender) %>% 
+  summarise(mean_sal_log = mean(sal_log), 
+            sd_sal_log = sd(sal_log))
+
+ggplot(data = a, aes(x = gender, y = mean_sal_log, fill = gender)) + 
+  geom_bar(stat = "identity", width = .5, position = "dodge") + 
+  geom_errorbar(aes(ymin = mean_sal_log - sd_sal_log, ymax = mean_sal_log + sd_sal_log), position = position_dodge(width = 0.5), width = .3)
+
+# direct way
+# law_trans %>% group_by(Gender) %>% summarise(mean_sal = mean(sal_log))
+# law %>% group_by(Gender) %>% summarise(mean_sal = mean(Sal))
 ```
 

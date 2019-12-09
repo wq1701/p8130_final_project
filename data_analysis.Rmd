@@ -13,7 +13,7 @@ library(psych)
 lawsuit_df = read_csv("./data/Lawsuit.csv") %>% janitor::clean_names()
 
 lawsuit_df = lawsuit_df %>% 
-  mutate(sum_sal = sal94 + sal95)
+  mutate(sum_sal = (sal94 + sal95)/2)
 ```
 
 ```{r descriptive stats}
@@ -64,6 +64,9 @@ lawsuit_df %>%
   ggplot(aes(sample = rt_sal)) + 
   stat_qq() + 
   stat_qq_line()
+
+
+
 ```
 
 
