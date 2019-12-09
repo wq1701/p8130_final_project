@@ -20,7 +20,6 @@ lawsuit_df = lawsuit_df %>%
 lawsuit_df %>% 
   describeBy(., group = "gender")
 
-
 # lawsuit_df %>% 
 #   gather(-id, -sum_sal, key = "var", value = "value") %>% 
 #   ggplot(aes(x = value, y = sum_sal)) + 

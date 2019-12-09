@@ -155,3 +155,37 @@ lawsuit_df %>%
 ```
 
 ![](data_analysis_files/figure-gfm/descriptive%20stats-7.png)<!-- -->
+
+``` r
+# outcome: settle for sum_sal for now. 
+# main predictor: gender
+
+# fit model
+
+model = lm(sum_sal~gender + prate + exper + rank + dept, data = lawsuit_df)
+summary(model)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = sum_sal ~ gender + prate + exper + rank + dept, 
+    ##     data = lawsuit_df)
+    ## 
+    ## Residuals:
+    ##     Min      1Q  Median      3Q     Max 
+    ## -159069  -59988   -6160   44557  334345 
+    ## 
+    ## Coefficients:
+    ##             Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)    47484      46964   1.011 0.312943    
+    ## gender         19891      11534   1.724 0.085834 .  
+    ## prate         -18607       5182  -3.591 0.000395 ***
+    ## exper           8369       1072   7.803 1.56e-13 ***
+    ## rank           28503       7874   3.620 0.000355 ***
+    ## dept           58968       5620  10.492  < 2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 80560 on 255 degrees of freedom
+    ## Multiple R-squared:  0.7777, Adjusted R-squared:  0.7734 
+    ## F-statistic: 178.5 on 5 and 255 DF,  p-value: < 2.2e-16
