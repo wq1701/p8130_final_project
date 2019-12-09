@@ -119,8 +119,17 @@ male_sal = law_trans %>%
   janitor::clean_names() %>% 
   filter(gender == "Male")
 
+male_model = lm(sal_log ~ dept + clin + cert + prate + rank + exper, data = male_sal)
+
+summary(male_model)
+
 female_sal = law_trans %>% 
   janitor::clean_names() %>% 
   filter(gender == "Female")
+
+female_model = lm(sal_log ~ dept + clin + cert + prate + rank + exper, data = female_sal)
+
+summary(female_model)
+
 ```
 
