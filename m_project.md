@@ -139,8 +139,8 @@ mult_fit = lm(sal_log ~ Dept + Gender + Clin + Cert + Prate + Rank + Exper, data
 step(mult_fit, direction = 'backward')
 ```
 
-Start: AIC=-1038.3 sal\_log \~ Dept + Gender + Clin + Cert + Prate +
-Rank + Exper
+Start: AIC=-1038.3 sal\_log ~ Dept + Gender + Clin + Cert + Prate + Rank
++ Exper
 
 ``` 
      Df Sum of Sq     RSS      AIC
@@ -154,7 +154,7 @@ Rank + Exper
   - Exper 1 1.7384 6.1610 -953.78
   - Dept 5 9.1712 13.5938 -755.23
 
-Step: AIC=-1039.32 sal\_log \~ Dept + Clin + Cert + Prate + Rank + Exper
+Step: AIC=-1039.32 sal\_log ~ Dept + Clin + Cert + Prate + Rank + Exper
 
 ``` 
     Df Sum of Sq     RSS      AIC
@@ -164,8 +164,8 @@ Step: AIC=-1039.32 sal\_log \~ Dept + Clin + Cert + Prate + Rank + Exper
 4.7088 -1025.94 - Rank 2 1.3973 5.8366 -971.90 - Cert 1 1.4549 5.8942
 -967.33 - Exper 1 1.8444 6.2837 -950.63 - Dept 5 9.3583 13.7976 -753.35
 
-Call: lm(formula = sal\_log \~ Dept + Clin + Cert + Prate + Rank +
-Exper, data = law\_trans)
+Call: lm(formula = sal\_log ~ Dept + Clin + Cert + Prate + Rank + Exper,
+data = law\_trans)
 
 Coefficients: (Intercept) DeptBiochemistry/Molecular Biology  
 12.26603 -0.86511  
@@ -186,8 +186,8 @@ mult_fit = lm(sal_log ~ Dept + Clin + Cert + Prate + Rank + Exper, data = law_tr
 summary(mult_fit)
 ```
 
-Call: lm(formula = sal\_log \~ Dept + Clin + Cert + Prate + Rank +
-Exper, data = law\_trans)
+Call: lm(formula = sal\_log ~ Dept + Clin + Cert + Prate + Rank + Exper,
+data = law\_trans)
 
 Residuals: Min 1Q Median 3Q Max -0.34228 -0.08136 -0.01292 0.08004
 0.90901

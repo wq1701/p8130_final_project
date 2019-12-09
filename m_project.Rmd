@@ -110,5 +110,17 @@ mult_fit = lm(sal_log ~ Dept + Gender + Clin + Cert + Prate + Rank + Exper, data
 step(mult_fit, direction = 'backward')
 mult_fit = lm(sal_log ~ Dept + Clin + Cert + Prate + Rank + Exper, data = law_trans)
 summary(mult_fit)
-
 ```
+
+```{r}
+# divide the df for strata analysis
+
+male_sal = law_trans %>% 
+  janitor::clean_names() %>% 
+  filter(gender == "Male")
+
+female_sal = law_trans %>% 
+  janitor::clean_names() %>% 
+  filter(gender == "Female")
+```
+
