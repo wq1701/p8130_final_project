@@ -116,111 +116,99 @@ cor(law_df[ ,c(5,6,8)]) %>%
 <img src="m_project_files/figure-gfm/unnamed-chunk-2-2.png" width="90%" />
 
 ``` r
-par(mfrow = c(1,3))
-hist(law$Prate, xlab = "Publication rate", freq = T, col = 2)
-hist(law$Exper, xlab = "Experience years", freq = T, col = 2)
+sal_log = log(law$Sal)
+
+par(mfrow = c(1,2))
+
 hist(law$Sal, xlab = "Salary", freq = T, col = 2)
+
+hist(sal_log, xlab = "lm(Salary)", freq = T, col = 2)
 ```
 
 <img src="m_project_files/figure-gfm/unnamed-chunk-2-3.png" width="90%" />
 
 ``` r
-exper_log = log(law$Exper)
-sal_log = log(law$Sal)
-
-par(mfrow = c(1,3))
-hist(law$Prate, xlab = "Publication rate", freq = T, col = 2)
-hist(exper_log, xlab = "lm(Experience years)", freq = T, col = 2)
-hist(sal_log, xlab = "lm(Salary)", freq = T, col = 2)
-```
-
-<img src="m_project_files/figure-gfm/unnamed-chunk-2-4.png" width="90%" />
-
-``` r
 law_trans = law_df %>%
   mutate(
-    exper_log = log(law$Exper),
     sal_log = log(law$Sal)
   ) %>% 
-  dplyr::select(-Exper, -Sal)
+  dplyr::select(-Sal)
 
 
-mult_fit = lm(sal_log ~ Dept + Gender + Clin + Cert + Prate + Rank + exper_log, data = law_trans)
+mult_fit = lm(sal_log ~ Dept + Gender + Clin + Cert + Prate + Rank + Exper, data = law_trans)
 step(mult_fit, direction = 'backward')
 ```
 
-Start: AIC=-1027.55 sal\_log \~ Dept + Gender + Clin + Cert + Prate +
-Rank + exper\_log
+Start: AIC=-1038.3 sal\_log \~ Dept + Gender + Clin + Cert + Prate +
+Rank + Exper
 
 ``` 
-        Df Sum of Sq     RSS      AIC
+     Df Sum of Sq     RSS      AIC
 ```
 
-  - Gender 1 0.0147 4.6233 -1028.72
-  - Prate 1 0.0341 4.6427 -1027.63 <none> 4.6086 -1027.55
-  - Clin 1 0.3029 4.9115 -1012.94
-  - Rank 2 1.0240 5.6326 -979.18
-  - Cert 1 1.1817 5.7903 -969.97
-  - exper\_log 1 1.5524 6.1610 -953.78
-  - Dept 5 8.6840 13.2926 -761.08
+  - Gender 1 0.0166 4.4393 -1039.32
+  - Prate 1 0.0279 4.4506 -1038.66 <none> 4.4226 -1038.30
+  - Clin 1 0.2858 4.7085 -1023.96
+  - Rank 2 1.2646 5.6872 -976.66
+  - Cert 1 1.4402 5.8628 -966.73
+  - Exper 1 1.7384 6.1610 -953.78
+  - Dept 5 9.1712 13.5938 -755.23
 
-Step: AIC=-1028.72 sal\_log \~ Dept + Clin + Cert + Prate + Rank +
-exper\_log
+Step: AIC=-1039.32 sal\_log \~ Dept + Clin + Cert + Prate + Rank + Exper
 
 ``` 
-        Df Sum of Sq     RSS      AIC
+    Df Sum of Sq     RSS      AIC
 ```
 
-<none> 4.6233 -1028.72 - Prate 1 0.0494 4.6727 -1027.95 - Clin 1 0.2882
-4.9115 -1014.94 - Rank 2 1.1018 5.7251 -976.93 - Cert 1 1.1882 5.8114
--971.03 - exper\_log 1 1.6604 6.2837 -950.63 - Dept 5 8.8220 13.4453
--760.10
+<none> 4.4393 -1039.32 - Prate 1 0.0421 4.4814 -1038.86 - Clin 1 0.2695
+4.7088 -1025.94 - Rank 2 1.3973 5.8366 -971.90 - Cert 1 1.4549 5.8942
+-967.33 - Exper 1 1.8444 6.2837 -950.63 - Dept 5 9.3583 13.7976 -753.35
 
 Call: lm(formula = sal\_log \~ Dept + Clin + Cert + Prate + Rank +
-exper\_log, data = law\_trans)
+Exper, data = law\_trans)
 
 Coefficients: (Intercept) DeptBiochemistry/Molecular Biology  
-12.06878 -0.85843  
+12.26603 -0.86511  
 DeptPhysiology DeptGenetics  
-\-1.02545 -0.70945  
+\-1.04178 -0.69957  
 DeptPediatrics DeptMedicine  
-\-0.70864 -0.36604  
+\-0.72362 -0.37481  
 ClinPrimarily clinical emphasis CertBoard certified  
-0.16163 0.17600  
+0.15640 0.19168  
 Prate RankAssistant  
-\-0.02807 -0.21275  
-RankAssociate exper\_log  
-\-0.10469
-0.18455
+\-0.02586 -0.22477  
+RankAssociate Exper  
+\-0.08811
+0.01832
 
 ``` r
-mult_fit = lm(sal_log ~ Dept + Clin + Cert + Prate + Rank + exper_log, data = law_trans)
+mult_fit = lm(sal_log ~ Dept + Clin + Cert + Prate + Rank + Exper, data = law_trans)
 summary(mult_fit)
 ```
 
 Call: lm(formula = sal\_log \~ Dept + Clin + Cert + Prate + Rank +
-exper\_log, data = law\_trans)
+Exper, data = law\_trans)
 
-Residuals: Min 1Q Median 3Q Max -0.32090 -0.08351 -0.01059 0.07524
-1.00546
+Residuals: Min 1Q Median 3Q Max -0.34228 -0.08136 -0.01292 0.08004
+0.90901
 
-Coefficients: Estimate Std. Error t value Pr(\>|t|) (Intercept) 12.06878
-0.09438 127.876 \< 2e-16 DeptBiochemistry/Molecular Biology -0.85843
-0.06265 -13.702 \< 2e-16 DeptPhysiology -1.02545 0.06239 -16.436 \<
-2e-16 DeptGenetics -0.70945 0.05510 -12.876 \< 2e-16 DeptPediatrics
--0.70864 0.03624 -19.554 \< 2e-16 DeptMedicine -0.36604 0.03175 -11.528
-\< 2e-16 ClinPrimarily clinical emphasis 0.16163 0.04102 3.940 0.000106
-CertBoard certified 0.17600 0.02200 7.999 4.73e-14 Prate -0.02807
-0.01721 -1.631 0.104163 RankAssistant -0.21275 0.02766 -7.690 3.40e-13
-RankAssociate -0.10469 0.02374 -4.410 1.54e-05 exper\_log 0.18455
-0.01952 9.457 \< 2e-16
+Coefficients: Estimate Std. Error t value Pr(\>|t|) (Intercept)
+12.266034 0.085607 143.283 \< 2e-16 DeptBiochemistry/Molecular Biology
+-0.865105 0.061350 -14.101 \< 2e-16 DeptPhysiology -1.041780 0.060909
+-17.104 \< 2e-16 DeptGenetics -0.699570 0.054045 -12.944 \< 2e-16
+DeptPediatrics -0.723620 0.035213 -20.549 \< 2e-16 DeptMedicine
+-0.374811 0.031005 -12.089 \< 2e-16 ClinPrimarily clinical emphasis
+0.156395 0.040226 3.888 0.000130 CertBoard certified 0.191677 0.021218
+9.034 \< 2e-16 Prate -0.025859 0.016831 -1.536 0.125711 RankAssistant
+-0.224767 0.025719 -8.739 3.53e-16 RankAssociate -0.088105 0.023618
+-3.730 0.000237 Exper 0.018316 0.001801 10.171 \< 2e-16
 
 (Intercept) *** DeptBiochemistry/Molecular Biology *** DeptPhysiology
 *** DeptGenetics *** DeptPediatrics *** DeptMedicine *** ClinPrimarily
 clinical emphasis *** CertBoard certified *** Prate  
-RankAssistant *** RankAssociate *** exper\_log \*\*\* — Signif. codes: 0
+RankAssistant *** RankAssociate *** Exper \*\*\* — Signif. codes: 0
 ‘***’ 0.001 ’**’ 0.01 ’*’ 0.05 ‘.’ 0.1 ’ ’ 1
 
-Residual standard error: 0.1363 on 249 degrees of freedom Multiple
-R-squared: 0.9313, Adjusted R-squared: 0.9283 F-statistic: 307 on 11 and
-249 DF, p-value: \< 2.2e-16
+Residual standard error: 0.1335 on 249 degrees of freedom Multiple
+R-squared: 0.9341, Adjusted R-squared: 0.9311 F-statistic: 320.6 on 11
+and 249 DF, p-value: \< 2.2e-16

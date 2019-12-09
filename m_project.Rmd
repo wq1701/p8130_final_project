@@ -88,37 +88,27 @@ par(mar = c(4,5,1,1))
 cor(law_df[ ,c(5,6,8)]) %>% 
   corrplot(method = "circle", type = "upper", diag = FALSE)
 
-
-par(mfrow = c(1,3))
-hist(law$Prate, xlab = "Publication rate", freq = T, col = 2)
-hist(law$Exper, xlab = "Experience years", freq = T, col = 2)
-hist(law$Sal, xlab = "Salary", freq = T, col = 2)
-
-exper_log = log(law$Exper)
 sal_log = log(law$Sal)
 
-par(mfrow = c(1,3))
-hist(law$Prate, xlab = "Publication rate", freq = T, col = 2)
-hist(exper_log, xlab = "lm(Experience years)", freq = T, col = 2)
+par(mfrow = c(1,2))
+
+hist(law$Sal, xlab = "Salary", freq = T, col = 2)
+
 hist(sal_log, xlab = "lm(Salary)", freq = T, col = 2)
-
-
 
 ```
 
 ```{r}
 law_trans = law_df %>%
   mutate(
-    exper_log = log(law$Exper),
     sal_log = log(law$Sal)
   ) %>% 
-  dplyr::select(-Exper, -Sal)
+  dplyr::select(-Sal)
 
 
-mult_fit = lm(sal_log ~ Dept + Gender + Clin + Cert + Prate + Rank + exper_log, data = law_trans)
+mult_fit = lm(sal_log ~ Dept + Gender + Clin + Cert + Prate + Rank + Exper, data = law_trans)
 step(mult_fit, direction = 'backward')
-mult_fit = lm(sal_log ~ Dept + Clin + Cert + Prate + Rank + exper_log, data = law_trans)
+mult_fit = lm(sal_log ~ Dept + Clin + Cert + Prate + Rank + Exper, data = law_trans)
 summary(mult_fit)
-
 
 ```
