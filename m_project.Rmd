@@ -1,0 +1,129 @@
+---
+title: "Final Project"
+author: Junhui Mi (jm4998)
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  fig.width = 8,
+  fig.height = 6,
+  out.width = "90%")
+
+library(arsenal)
+library(dplyr)
+library(tidyverse)
+library(ggridges)
+library(HH)
+library(leaps)
+library(corrplot)
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+```
+
+
+```{r}
+law = read_csv("./data/Lawsuit.csv") %>%
+  dplyr::select(-ID)
+law$Dept <- ifelse(law$Dept == 6, 0, ifelse(law$Dept != 6, law$Dept, NA))
+law$Rank <- ifelse(law$Rank == 3, 0, ifelse(law$Rank != 3, law$Rank, NA))
+
+law_1 = law %>%
+  mutate(
+    Gender = as.factor(Gender),
+    Dept = as.factor(Dept),
+    Clin = as.factor(Clin),
+    Cert = as.factor(Cert),
+    Rank = as.factor(Rank)
+  )
+
+law_df = law %>%
+  mutate(Gender = factor(Gender, levels = c(0,1), labels = c("Female", "Male")),
+         Dept = factor(Dept, levels = c(0,1,2,3,4,5), 
+                       labels = c("Surgery", "Biochemistry/Molecular Biology", "Physiology", "Genetics", "Pediatrics", "Medicine")),
+         Clin = factor(Clin, levels = c(0,1), labels = c("Primarily research emphasis", "Primarily clinical emphasis")),
+         Cert = factor(Cert, levels = c(0,1), labels = c("not certified", "Board certified")),
+         Rank = factor(Rank, levels = c(0,1,2), labels = c("Full professor", "Assistant", "Associate")))
+
+my_labels <- list(Dept = "Department", Gender = "Gender", Clin = "Research/Clinical emphasis", Cert = "Not/Board Certificated", Prate = "Publication rate", Exper = "Experience(years)", Rank = "Title", Sal94 = "Salary in 1994", Sal95 = "Salary in 1995")
+
+my_controls <- tableby.control(
+  total = T,
+  test = F, 
+  digits = 2,
+  numeric.stats = c("meansd", "medianq1q3", "range"),
+  cat.stats = c("countpct"),
+  stats.labels = list(
+    meansd = "Mean (SD)",
+    medianq1q3 = "Median (Q1, Q3)",
+    range = "Min - Max",
+    countpct = "N (%)"))
+
+tab1 <- tableby(Gender ~ Dept + Clin + Cert + Prate + Exper + Rank + Sal94 + Sal95, data = law_df, control = my_controls)
+
+summary(tab1, title = "Summary by Gender", 
+        labelTranslations = my_labels, text = T)
+```
+
+```{r}
+attach(law)
+pairs(law)
+cor_mat = round(cor(law),2)
+
+
+par(mar = c(4,5,1,1))
+par(mfrow = c(1,2))
+cor(law_df[ ,c(5,6,8)]) %>% 
+  corrplot(method = "circle", type = "upper", diag = FALSE)
+cor(law_df[ ,c(5,6,9)]) %>% 
+  corrplot(method = "circle", type = "upper", diag = FALSE)
+
+par(mfrow = c(2,2))
+hist(law$Prate, xlab = "Publication rate", freq = T, col = 2)
+hist(law$Exper, xlab = "Experience years", freq = T, col = 2)
+hist(law$Sal94, xlab = "Salary in 1994", freq = T, col = 2)
+hist(law$Sal95, xlab = "Salary in 1995", freq = T, col = 2)
+
+exper_log = log(law$Exper)
+sal94_log = log(law$Sal94)
+sal95_log = log(law$Sal95)
+par(mfrow = c(2,2))
+hist(law$Prate, xlab = "Publication rate", freq = T, col = 2)
+hist(exper_log, xlab = "lm(Experience years)", freq = T, col = 2)
+hist(sal94_log, xlab = "lm(Salary in 1994)", freq = T, col = 2)
+hist(sal95_log, xlab = "lm(Salary in 1995)", freq = T, col = 2)
+
+
+```
+
+```{r}
+law_trans = law_df %>%
+  mutate(
+    exper_log = log(law$Exper),
+    sal94_log = log(law$Sal94),
+    sal95_log = log(law$Sal95)
+  ) %>% 
+  dplyr::select(-Exper, -Sal94, -Sal95)
+
+
+mult_fit94 = lm(sal94_log ~ Dept + Gender + Clin + Cert + Prate + Rank + exper_log, data = law_trans)
+step(mult_fit94, direction = 'backward')
+mult_fit94 = lm(sal94_log ~ Dept + Clin + Cert + Prate + Rank + exper_log, data = law_trans)
+summary(mult_fit94)
+
+mult_fit95 = lm(sal95_log ~ Dept + Gender + Clin + Cert + Prate + Rank + exper_log, data = law_trans)
+step(mult_fit95, direction = 'backward')
+mult_fit95 = lm(sal95_log ~ Dept + Clin + Cert + Prate + Rank + exper_log, data = law_trans)
+summary(mult_fit95)
+
+```
