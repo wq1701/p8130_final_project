@@ -111,7 +111,7 @@ mult_fit = lm(sal_log ~ Dept + Clin + Cert + Prate + Rank + Exper, data = law_tr
 summary(mult_fit)
 ```
 
-```{r}
+```{r stratified model}
 # divide the df for strata analysis
 
 male_sal = law_trans %>% 
@@ -131,7 +131,7 @@ female_model = lm(sal_log ~ dept + clin + cert + prate + rank + exper, data = fe
 summary(female_model)
 ```
 
-```{r}
+```{r viz in bar and errorbar}
 a = law_trans %>% 
   janitor::clean_names() %>% 
   group_by(gender) %>% 
@@ -146,4 +146,27 @@ ggplot(data = a, aes(x = gender, y = mean_sal_log, fill = gender)) +
 # law_trans %>% group_by(Gender) %>% summarise(mean_sal = mean(sal_log))
 # law %>% group_by(Gender) %>% summarise(mean_sal = mean(Sal))
 ```
+
+```{r}
+HH::vif(male_model)
+
+anova(male_model)
+
+anova(female_model)
+```
+
+as the anova result for both model show, the `variable` prate should be removed. 
+
+```{r update both models}
+male_model = update(male_model, .~. -prate, data = male_sal)
+
+anova(male_model)
+
+female_model = update(female_model, .~. -prate, data = female_sal)
+
+anova(female_model)
+```
+
+now all the variables are significant
+
 
