@@ -351,10 +351,162 @@ ggplot(data = a, aes(x = gender, y = mean_sal_log, fill = gender)) +
   geom_errorbar(aes(ymin = mean_sal_log - sd_sal_log, ymax = mean_sal_log + sd_sal_log), position = position_dodge(width = 0.5), width = .3)
 ```
 
-<img src="m_project_files/figure-gfm/unnamed-chunk-5-1.png" width="90%" />
+<img src="m_project_files/figure-gfm/viz in bar and errorbar-1.png" width="90%" />
 
 ``` r
 # direct way
 # law_trans %>% group_by(Gender) %>% summarise(mean_sal = mean(sal_log))
 # law %>% group_by(Gender) %>% summarise(mean_sal = mean(Sal))
 ```
+
+``` r
+# no correlation
+male_sal %>% pairs()
+```
+
+<img src="m_project_files/figure-gfm/unnamed-chunk-4-1.png" width="90%" />
+
+``` r
+female_sal %>% pairs()
+```
+
+<img src="m_project_files/figure-gfm/unnamed-chunk-4-2.png" width="90%" />
+
+``` r
+HH::vif(male_model)
+```
+
+    ## deptBiochemistry/Molecular Biology                     deptPhysiology 
+    ##                           9.176018                           6.590733 
+    ##                       deptGenetics                     deptPediatrics 
+    ##                           2.293760                           1.370363 
+    ##                       deptMedicine    clinPrimarily clinical emphasis 
+    ##                           2.662270                           5.801757 
+    ##                certBoard certified                              prate 
+    ##                           1.350564                          17.364215 
+    ##                      rankAssistant                      rankAssociate 
+    ##                           2.053394                           1.405463 
+    ##                              exper 
+    ##                           1.603398
+
+``` r
+HH::vif(female_model)
+```
+
+    ## deptBiochemistry/Molecular Biology                     deptPhysiology 
+    ##                          10.983299                          10.342194 
+    ##                       deptGenetics                     deptPediatrics 
+    ##                           5.946642                           4.366763 
+    ##                       deptMedicine    clinPrimarily clinical emphasis 
+    ##                           5.881171                           6.375378 
+    ##                certBoard certified                              prate 
+    ##                           1.641127                          15.613359 
+    ##                      rankAssistant                      rankAssociate 
+    ##                           3.749438                           2.277852 
+    ##                              exper 
+    ##                           2.284054
+
+``` r
+anova(male_model)
+```
+
+    ## Analysis of Variance Table
+    ## 
+    ## Response: sal_log
+    ##            Df  Sum Sq Mean Sq  F value    Pr(>F)    
+    ## dept        5 27.6502  5.5300 301.6226 < 2.2e-16 ***
+    ## clin        1  0.8687  0.8687  47.3800 1.700e-10 ***
+    ## cert        1  1.5168  1.5168  82.7290 7.269e-16 ***
+    ## prate       1  0.0168  0.0168   0.9168    0.3399    
+    ## rank        2  2.6824  1.3412  73.1526 < 2.2e-16 ***
+    ## exper       1  1.2133  1.2133  66.1784 1.806e-13 ***
+    ## Residuals 143  2.6218  0.0183                       
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+anova(female_model)
+```
+
+    ## Analysis of Variance Table
+    ## 
+    ## Response: sal_log
+    ##           Df  Sum Sq Mean Sq  F value    Pr(>F)    
+    ## dept       5 14.3918 2.87836 178.5368 < 2.2e-16 ***
+    ## clin       1  1.4248 1.42483  88.3783 3.452e-15 ***
+    ## cert       1  0.9628 0.96280  59.7201 1.184e-11 ***
+    ## prate      1  0.0190 0.01901   1.1789    0.2804    
+    ## rank       2  2.4704 1.23518  76.6150 < 2.2e-16 ***
+    ## exper      1  0.6163 0.61632  38.2285 1.614e-08 ***
+    ## Residuals 94  1.5155 0.01612                       
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+as the anova result for both model show, the `variable` prate should be
+removed.
+
+``` r
+male_model = update(male_model, .~. -prate, data = male_sal)
+
+anova(male_model)
+```
+
+    ## Analysis of Variance Table
+    ## 
+    ## Response: sal_log
+    ##            Df  Sum Sq Mean Sq F value    Pr(>F)    
+    ## dept        5 27.6502  5.5300 303.580 < 2.2e-16 ***
+    ## clin        1  0.8687  0.8687  47.688 1.482e-10 ***
+    ## cert        1  1.5168  1.5168  83.266 5.843e-16 ***
+    ## rank        2  2.6825  1.3412  73.629 < 2.2e-16 ***
+    ## exper       1  1.2288  1.2288  67.455 1.123e-13 ***
+    ## Residuals 144  2.6231  0.0182                      
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+``` r
+female_model = update(female_model, .~. -prate, data = female_sal)
+
+anova(female_model)
+```
+
+    ## Analysis of Variance Table
+    ## 
+    ## Response: sal_log
+    ##           Df  Sum Sq Mean Sq F value    Pr(>F)    
+    ## dept       5 14.3918 2.87836 176.917 < 2.2e-16 ***
+    ## clin       1  1.4248 1.42483  87.576 3.890e-15 ***
+    ## cert       1  0.9628 0.96280  59.178 1.330e-11 ***
+    ## rank       2  2.4702 1.23509  75.914 < 2.2e-16 ***
+    ## exper      1  0.6054 0.60536  37.208 2.283e-08 ***
+    ## Residuals 95  1.5456 0.01627                      
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+
+now all the variables are significant
+
+``` r
+par(mfrow = c(2,2))
+plot(male_model)
+```
+
+<img src="m_project_files/figure-gfm/unnamed-chunk-5-1.png" width="90%" />
+
+``` r
+plot(female_model)
+```
+
+<img src="m_project_files/figure-gfm/unnamed-chunk-5-2.png" width="90%" />
+
+from the plot, obeservation 113 in the `male_sal` data frame is
+abnormal. Therefore it’ll be removed.
+
+``` r
+male_sal = male_sal[-113, ]
+male_model_new = lm(sal_log ~ dept + clin + cert + prate + rank + exper, data = male_sal)
+
+par(mfrow = c(2,2))
+plot(male_model_new)
+```
+
+<img src="m_project_files/figure-gfm/unnamed-chunk-6-1.png" width="90%" />

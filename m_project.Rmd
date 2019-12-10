@@ -148,7 +148,13 @@ ggplot(data = a, aes(x = gender, y = mean_sal_log, fill = gender)) +
 ```
 
 ```{r}
+# no correlation
+male_sal %>% pairs()
+female_sal %>% pairs()
+
 HH::vif(male_model)
+
+HH::vif(female_model)
 
 anova(male_model)
 
@@ -168,5 +174,23 @@ anova(female_model)
 ```
 
 now all the variables are significant
+
+```{r}
+par(mfrow = c(2,2))
+plot(male_model)
+plot(female_model)
+```
+
+from the plot, obeservation 113 in the `male_sal` data frame is abnormal. Therefore it'll be removed. 
+
+```{r}
+male_sal = male_sal[-113, ]
+male_model_new = lm(sal_log ~ dept + clin + cert + prate + rank + exper, data = male_sal)
+
+par(mfrow = c(2,2))
+plot(male_model_new)
+```
+
+now the model seems good. the two models are `female_model` and `male_model_new`. 
 
 
