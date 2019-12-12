@@ -1,0 +1,75 @@
+---
+title: "partition_"
+author: "wq2151"
+date: "12/11/2019"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+There is a big diffenrence in magnitude of model coefficients, therefore we will partition the data by `dept`. 
+
+```{r partition data by dept}
+# law_df %>% group_by(dept) %>% summarise(n = n())
+
+surg_df = law_df %>% filter(dept == "Surgery")
+bio_df = law_df %>% filter(dept == "Biochemistry/Molecular Biology")
+phys_df = law_df %>% filter(dept == "Physiology")
+gene_df = law_df %>% filter(dept == "Genetics")
+pedia_df = law_df %>% filter(dept == "Pediatrics")
+med_df = law_df %>% filter(dept == "Medicine")
+```
+
+fit models with partitioned data (in surgery department)
+
+```{r surg dept}
+# surgery department
+surg_model = lm(mean_sal~gender + exper + rank, data = surg_df)
+
+summary(surg_model)
+```
+
+biochemistry department
+
+```{r}
+bio_model = lm(mean_sal~gender + exper + rank, data = bio_df)
+
+bio_model %>% summary()
+
+# p-value = 0.0375
+```
+
+physiology department
+
+```{r}
+phys_model = lm(mean_sal~gender + exper + rank, data = phys_df)
+
+phys_model %>% summary()
+```
+
+genetics department
+
+```{r}
+gene_model = lm(mean_sal~gender + exper + rank, data = gene_df)
+
+gene_model %>% summary()
+```
+
+pediatrics department
+
+```{r}
+pedia_model = lm(mean_sal~gender + exper + rank, data = pedia_df)
+
+gene_model %>% summary()
+```
+
+medicine department
+
+```{r}
+med_model = lm(mean_sal~gender + exper + rank, data = med_df)
+
+med_model %>% summary()
+```
+

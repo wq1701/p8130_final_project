@@ -9,6 +9,24 @@ library(tidyverse)
 ```
 
 ```{r}
+# 文献参考
+# 1: The Gender Gap in Salaries of Educational Administration Professors
+# 可参考变量： 
+# - academic rank 
+# - years of experience as a professor
+# - research productivity measures 里面的number of books written or edited(可以Publication做比较？)
+# - current academic year salary
+# - gender
+# 
+# 2. Pay Structure, Female Representation and the Gender Pay Gap among University Professors
+# 可参考变量： 
+# - department
+
+# 常见： experience, rank
+# 存在： publication rate, department
+```
+
+```{r}
 law_df = read_csv("./data/Lawsuit.csv") %>% 
   janitor::clean_names() %>% 
   mutate(mean_sal = (sal94 + sal95)/2) %>% 
@@ -30,87 +48,42 @@ law_df = read_csv("./data/Lawsuit.csv") %>%
 
 first, fit only gender in the model
 ```{r}
-model_1 = lm(mean_sal~gender, data = law_df)
+model_0 = lm(mean_sal~gender, data = law_df)
 ```
 
 see if a variable is a confounder (lec 15, page 29; epi lec 7, page 69)
 
-```{r confounders}
-# dept
+```{r dept confounder}
 model_dept = lm(mean_sal~gender + dept, data = law_df)
 
-model_1 %>% broom::tidy()
+anova(model_0, model_dept)
 
-model_dept %>% broom::tidy()
+# include in the model
+```
 
-# yes
-
-# rank 
-
+```{r rank confd}
 model_rank = lm(mean_sal~gender + rank, data = law_df)
 
-model_rank %>% broom::tidy()
+# summary(model_rank)
+
+anova(model_0, model_rank)
 
 # not a confounder
+```
 
-# prate
-
+```{r prate confd}
 model_prate = lm(mean_sal~gender + prate, data = law_df)
 
-model_prate %>% broom::tidy()
+anova(model_0, model_prate)
 
-# maybe? should I use anova or something else to determine if it's a confounder? 
+# result: include prate in the model
 ```
 
-There is a big diffenrence in magnitude of model coefficients, therefore we will partition the data by `dept`. 
+```{r exper confd}
+model_exper = lm(mean_sal~gender + exper, data = law_df)
 
-```{r partition data by dept}
-# law_df %>% group_by(dept) %>% summarise(n = n())
+anova(model_0, model_exper)
 
-surg_df = law_df %>% filter(dept == "Surgery")
-bio_df = law_df %>% filter(dept == "Biochemistry/Molecular Biology")
-phys_df = law_df %>% filter(dept == "Physiology")
-gene_df = law_df %>% filter(dept == "Genetics")
-pedia_df = law_df %>% filter(dept == "Pediatrics")
-med_df = law_df %>% filter(dept == "Medicine")
-```
-
-fit models with partitioned data (in surgery department)
-
-```{r surg dept}
-# surgery department
-surg_model = lm(mean_sal~gender, data = surg_df)
-
-anova(surg_model)
-
-surg_model %>% broom::tidy()
-
-# p-value 0.2 ?????????????????????????????????????????????????????????????
-
-summary(surg_model)
-```
-
-biochem department
-
-```{r}
-bio_model = lm(mean_sal~gender, data = bio_df)
-
-bio_model %>% broom::tidy()
-
-bio_model %>% summary()
-
-# p-value = 0.0375
-```
-
-physiology department
-
-```{r}
-phys_model = lm(mean_sal~gender, data = phys_df)
-
-phys_model %>% broom::tidy()
-
-phys_model %>% summary()
-
-# p-value = 0.00462
+# result: include prate in the model
 ```
 
