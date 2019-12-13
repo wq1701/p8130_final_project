@@ -1772,8 +1772,8 @@ summary(law_df_no184)
     ##      exper                   rank         sal94            sal95       
     ##  Min.   : 1.00   Full professor: 85   Min.   : 34514   Min.   : 38675  
     ##  1st Qu.: 6.00   Assistant     :111   1st Qu.: 90736   1st Qu.: 99855  
-    ##  Median : 9.00   Associate     : 64   Median :133191   Median :147722  
-    ##  Mean   :10.26                        Mean   :153223   Mean   :168494  
+    ##  Median : 9.00   Associate     : 64   Median :133190   Median :147722  
+    ##  Mean   :10.26                        Mean   :153222   Mean   :168494  
     ##  3rd Qu.:14.00                        3rd Qu.:197664   3rd Qu.:217847  
     ##  Max.   :37.00                        Max.   :428876   Max.   :472589  
     ##     mean_sal    
@@ -1783,6 +1783,49 @@ summary(law_df_no184)
     ##  Mean   :11.86  
     ##  3rd Qu.:12.25  
     ##  Max.   :13.01
+
+``` r
+summary(model_no184)
+```
+
+    ## 
+    ## Call:
+    ## lm(formula = mean_sal ~ gender + cert + exper + dept + clin, 
+    ##     data = law_df_no184)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -0.37774 -0.09219  0.00776  0.08804  0.36024 
+    ## 
+    ## Coefficients:
+    ##                                     Estimate Std. Error t value Pr(>|t|)
+    ## (Intercept)                        11.853001   0.039894 297.116  < 2e-16
+    ## genderMale                          0.057108   0.020105   2.841  0.00487
+    ## certBoard certified                 0.197069   0.022342   8.821  < 2e-16
+    ## exper                               0.027385   0.001576  17.381  < 2e-16
+    ## deptBiochemistry/Molecular Biology -0.886955   0.037406 -23.711  < 2e-16
+    ## deptPhysiology                     -1.053165   0.035835 -29.389  < 2e-16
+    ## deptGenetics                       -0.706224   0.041403 -17.057  < 2e-16
+    ## deptPediatrics                     -0.704877   0.036024 -19.567  < 2e-16
+    ## deptMedicine                       -0.389122   0.028050 -13.872  < 2e-16
+    ## clinPrimarily clinical emphasis     0.225069   0.023249   9.681  < 2e-16
+    ##                                       
+    ## (Intercept)                        ***
+    ## genderMale                         ** 
+    ## certBoard certified                ***
+    ## exper                              ***
+    ## deptBiochemistry/Molecular Biology ***
+    ## deptPhysiology                     ***
+    ## deptGenetics                       ***
+    ## deptPediatrics                     ***
+    ## deptMedicine                       ***
+    ## clinPrimarily clinical emphasis    ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.1412 on 250 degrees of freedom
+    ## Multiple R-squared:  0.9255, Adjusted R-squared:  0.9229 
+    ## F-statistic: 345.3 on 9 and 250 DF,  p-value: < 2.2e-16
 
 ``` r
 #Check the model assumptions

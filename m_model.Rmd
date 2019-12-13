@@ -201,6 +201,40 @@ HH::vif(model_diag)
 
 ```
 
+partition the data by rank
+
+```{r}
+law_df = law_df %>% 
+  mutate(log_mean_sal = log(mean_sal))
+
+assistant_df = law_df %>% 
+  filter(rank == "Assistant")
+
+associate_df = law_df %>% 
+  filter(rank == "Associate")
+
+full_pro_df = law_df %>% 
+  filter(rank == "Full professor")
+```
+
+
+```{r}
+assistant_model = lm(log_mean_sal~gender + cert + exper + dept + clin, data = assistant_df)
+
+summary(assistant_model)
+
+associate_model = lm(log_mean_sal~gender + cert + exper + dept + clin, data = associate_df)
+
+summary(associate_model)
+
+fullprof_model = lm(log_mean_sal~gender + cert + exper + dept + clin, data = full_pro_df)
+
+summary(fullprof_model)
+```
+
+
+
+
 # Outliers/influential points
 ```{r}
 state_res = rstandard(model_diag)
@@ -219,7 +253,13 @@ law_df_no184 = law_df[-184,]
 model_no184 = lm(mean_sal~gender + cert + exper + dept + clin, data = law_df_no184)
 summary(law_df_no184)
 
+summary(model_no184)
+
 #Check the model assumptions
 par(mfrow = c(2,2))
 plot(model_no184)
 ```
+
+
+
+
