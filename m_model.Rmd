@@ -1,0 +1,225 @@
+---
+title: "Final Project"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(
+  echo = TRUE,
+  warning = FALSE,
+  fig.width = 8,
+  fig.height = 6,
+  out.width = "90%")
+
+library(arsenal)
+library(dplyr)
+library(tidyverse)
+library(ggridges)
+library(HH)
+library(leaps)
+library(corrplot)
+
+options(
+  ggplot2.continuous.colour = "viridis",
+  ggplot2.continuous.fill = "viridis"
+)
+
+scale_colour_discrete = scale_colour_viridis_d
+scale_fill_discrete = scale_fill_viridis_d
+
+theme_set(theme_minimal() + theme(legend.position = "bottom"))
+```
+
+# Data exploration
+```{r}
+law = read_csv("./data/Lawsuit.csv") %>%
+  mutate(Sal = (Sal94 + Sal95)/2) %>%
+  dplyr::select(-ID, -Sal94, -Sal95)
+
+law_df = law %>%
+  mutate(Gender = factor(Gender, levels = c(0,1), labels = c("Female", "Male")),
+         Dept = factor(Dept, levels = c(6,1,2,3,4,5), 
+                       labels = c("Surgery", "Biochemistry/Molecular Biology", "Physiology", "Genetics", "Pediatrics", "Medicine")),
+         Clin = factor(Clin, levels = c(0,1), labels = c("Primarily research emphasis", "Primarily clinical emphasis")),
+         Cert = factor(Cert, levels = c(0,1), labels = c("not certified", "Board certified")),
+         Rank = factor(Rank, levels = c(3,1,2), labels = c("Full professor", "Assistant", "Associate")))
+
+my_labels <- list(Dept = "Department", Gender = "Gender", Clin = "Research/Clinical emphasis", Cert = "Not/Board Certificated", Prate = "Publication rate", Exper = "Experience(years)", Rank = "Title", Sal = "Average Salary in 1994-1995")
+
+my_controls <- tableby.control(
+  total = T,
+  test = F, 
+  digits = 2,
+  numeric.stats = c("meansd", "medianq1q3", "range"),
+  cat.stats = c("countpct"),
+  stats.labels = list(
+    meansd = "Mean (SD)",
+    medianq1q3 = "Median (Q1, Q3)",
+    range = "Min - Max",
+    countpct = "N (%)"))
+
+tab1 = tableby(Gender ~ Dept + Clin + Cert + Prate + Exper + Rank + Sal, data = law_df, control = my_controls) %>%
+  summary(title = "Summary by Gender", 
+        labelTranslations = my_labels, text = T)
+
+tab1 %>% knitr::kable(format = "html")
+```
+
+# Transformation
+```{r}
+attach(law)
+pairs(law)
+cor_mat = round(cor(law),2)
+
+sal_log = log(law$Sal)
+
+par(mfrow = c(1,2))
+
+hist(law$Sal, xlab = "Salary", freq = T, col = 2)
+
+hist(sal_log, xlab = "lm(Salary)", freq = T, col = 2)
+```
+
+# Model
+```{r}
+law_df = read_csv("./data/Lawsuit.csv") %>% 
+  janitor::clean_names() %>% 
+  mutate(mean_sal = log((sal94 + sal95)/2)) %>%
+  mutate(gender = factor(gender, levels = c(0,1), labels = c("Female", "Male")),
+         dept = factor(dept, levels = c(6,1,2,3,4,5), 
+                       labels = c("Surgery", "Biochemistry/Molecular Biology", "Physiology", "Genetics", "Pediatrics", "Medicine")),
+         clin = factor(clin, levels = c(0,1), labels = c("Primarily research emphasis", "Primarily clinical emphasis")),
+         cert = factor(cert, levels = c(0,1), labels = c("not certified", "Board certified")),
+         rank = factor(rank, levels = c(3,1,2), labels = c("Full professor", "Assistant", "Associate")))
+
+```
+
+## First, fit only gender in the model
+```{r}
+model_0 = lm(mean_sal~gender, data = law_df)
+
+summary(model_0)
+```
+
+As a single variable, gender is significant. Let's check confounder and interaction
+
+## Next see if a variable is a confounder or interaction
+```{r dept confounder}
+model_dept1 = lm(mean_sal~gender + dept, data = law_df)
+
+model_dept2 = lm(mean_sal~gender*dept, data = law_df)
+
+summary(model_dept1)
+
+summary(model_dept2)
+
+# department is a confounder, not a modifier, and should be included in the model
+```
+
+```{r rank confd}
+model_rank1 = lm(mean_sal~gender + rank, data = law_df)
+
+model_rank2 = lm(mean_sal~gender*rank, data = law_df)
+
+summary(model_rank1)
+
+summary(model_rank2)
+
+# rank is not a confounder, but probabaly a modifier.
+```
+
+```{r prate}
+model_prate1 = lm(mean_sal~gender + prate, data = law_df)
+
+model_prate2 = lm(mean_sal~gender*prate, data = law_df)
+
+summary(model_prate1)
+
+summary(model_prate2)
+
+# prate is a confounder, not a modifier and should be included in the model
+```
+
+```{r exper}
+model_exper1 = lm(mean_sal~gender + exper, data = law_df)
+
+model_exper2 = lm(mean_sal~gender*exper, data = law_df)
+
+summary(model_exper1)
+
+summary(model_exper2)
+
+# exper is a confounder, not a modifier, and should be included in the model
+```
+
+
+```{r clin}
+model_clin1 = lm(mean_sal~gender + clin, data = law_df)
+
+model_clin2 = lm(mean_sal~gender*clin, data = law_df)
+
+summary(model_clin1)
+
+summary(model_clin2)
+
+# clin is a confounder, not a modifier, and should be included in the model
+```
+
+```{r cert}
+model_cert1 = lm(mean_sal~gender + cert, data = law_df)
+
+model_cert2 = lm(mean_sal~gender*cert, data = law_df)
+
+summary(model_cert1)
+
+summary(model_cert2)
+
+# cert is a confounder, not a modifier, and should be included in the model
+```
+
+## Finally fit new model and diagnostic
+```{r}
+mult_fit = lm(mean_sal ~ dept + gender + cert + exper + clin + prate + rank, data = law_df)
+
+summary(mult_fit)
+
+model_new = lm(mean_sal~gender + cert + exper + dept + clin + prate, data = law_df)
+
+summary(model_new)
+
+#rank is associated with gender, and if we include rank in the model, gender become insignificant. rank is probably in the casual pathway between gender and salary.
+
+HH::vif(model_new)
+
+#There is collinearity between prate and dept, prate and clin, we can remove prate.
+
+model_diag = lm(mean_sal~gender + cert + exper + dept + clin, data = law_df)
+
+summary(model_diag)
+
+HH::vif(model_diag)
+
+```
+
+# Outliers/influential points
+```{r}
+state_res = rstandard(model_diag)
+state_hat = hatvalues(model_diag)
+outliers_x = state_hat[state_hat > 0.2]
+outliers_x
+outliers_y = state_res[abs(state_res) > 2.5]
+outliers_y
+
+influence.measures(model_diag)
+par(mfrow = c(2,2))
+plot(model_diag)
+
+#Remove observations 184
+law_df_no184 = law_df[-184,]
+model_no184 = lm(mean_sal~gender + cert + exper + dept + clin, data = law_df_no184)
+summary(law_df_no184)
+
+#Check the model assumptions
+par(mfrow = c(2,2))
+plot(model_no184)
+```
