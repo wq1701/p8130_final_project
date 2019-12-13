@@ -43,47 +43,152 @@ law_df = read_csv("./data/Lawsuit.csv") %>%
          clin = factor(clin, levels = c(0,1), labels = c("Primarily research emphasis", "Primarily clinical emphasis")),
          cert = factor(cert, levels = c(0,1), labels = c("not certified", "Board certified")),
          rank = factor(rank, levels = c(3,1,2), labels = c("Full professor", "Assistant", "Associate")))
-
 ```
+
+```{r}
+# plots
+
+law_df %>% 
+  ggplot() + 
+  geom_boxplot(aes(x = dept, y = mean_sal, fill = gender))
+
+law_df %>% 
+  ggplot() + 
+  geom_boxplot(aes(x = clin, y = mean_sal, fill = gender))
+
+law_df %>% 
+  ggplot() + 
+  geom_boxplot(aes(x = cert, y = mean_sal, fill = gender))
+
+law_df %>% 
+  ggplot() + 
+  geom_point(aes(x = prate, y = mean_sal, color = gender))
+
+law_df %>% 
+  ggplot() + 
+  geom_point(aes(x = exper, y = mean_sal, color = gender))
+
+law_df %>% 
+  ggplot() + 
+  geom_boxplot(aes(x = rank, y = mean_sal, fill = gender))
+```
+
+```{r}
+# transfrom mean_sal
+
+law_df %>% 
+  ggplot(aes(sample = mean_sal)) +
+  stat_qq() + 
+  stat_qq_line()
+
+# try log transfromation
+
+law_df = law_df %>% 
+  mutate(log_mean_sal = log(mean_sal))
+
+law_df %>% 
+  ggplot(aes(sample = log_mean_sal)) +
+  stat_qq() + 
+  stat_qq_line()
+
+law_df %>% 
+  ggplot() + 
+  geom_density(aes(x = log_mean_sal), color = "darkblue", fill = "lightblue")
+```
+
+now the shape is close to a bell. 
 
 first, fit only gender in the model
 ```{r}
-model_0 = lm(mean_sal~gender, data = law_df)
+model_0 = lm(log_mean_sal~gender, data = law_df)
 ```
 
 see if a variable is a confounder (lec 15, page 29; epi lec 7, page 69)
 
 ```{r dept confounder}
-model_dept = lm(mean_sal~gender + dept, data = law_df)
+model_dept = lm(log_mean_sal~gender + dept, data = law_df)
 
-anova(model_0, model_dept)
+summary(model_0)
+summary(model_dept)
 
+# the coefficient of gender change more than 10%: 0.38530 to 0.20521
 # include in the model
 ```
 
 ```{r rank confd}
-model_rank = lm(mean_sal~gender + rank, data = law_df)
+model_rank = lm(log_mean_sal~gender + rank, data = law_df)
 
-# summary(model_rank)
+summary(model_rank)
 
-anova(model_0, model_rank)
-
+# coefficients change from 0.38530 to 0.34948, 
 # not a confounder
 ```
 
 ```{r prate confd}
-model_prate = lm(mean_sal~gender + prate, data = law_df)
+model_prate = lm(log_mean_sal~gender + prate, data = law_df)
 
-anova(model_0, model_prate)
+summary(model_prate)
 
-# result: include prate in the model
+# gender coeff change from 0.38530 to 0.251814, which is more than 10%. 
 ```
 
 ```{r exper confd}
-model_exper = lm(mean_sal~gender + exper, data = law_df)
+model_exper = lm(log_mean_sal~gender + exper, data = law_df)
 
-anova(model_0, model_exper)
+summary(model_exper)
 
-# result: include prate in the model
+# 0.38530 to 0.30755, more than 10%: keep in the model
 ```
+
+```{r clin confd}
+model_clin = lm(log_mean_sal~gender + clin, data = law_df)
+
+summary(model_clin)
+
+# 0.38530 to 0.33718, more than 10%, keep in the model
+```
+
+```{r}
+model_cert = lm(log_mean_sal~gender + cert, data = law_df)
+
+model_cert %>% summary()
+
+# 0.38530 to 0.33285, more than 10%, keep in the model
+```
+
+
+therefore, we conclude that variables `dept`, `prate`, `clin`, `cert` and `exper` should be included in the model as confounders, they should be included in the model to adjust for the main predictor `gender`. `rank` is left. 
+
+Now the model we have is: 
+
+```{r}
+model_1 = lm(log_mean_sal~gender + dept + prate + clin + cert + exper, data = law_df)
+
+```
+
+
+next we consider interaction terms. 
+
+```{r}
+inter_model = lm(log_mean_sal~gender + dept + prate + clin + cert + exper + gender*rank, data = law_df)
+
+summary(model_1)
+summary(inter_model)
+
+anova(model_1, inter_model) %>% broom::tidy()
+```
+
+From the result, we notice that the p-value of interaction term is small. We should consider partition the data by rank. 
+
+```{r}
+assistant_df = law_df %>% 
+  filter(rank == "Assistant")
+
+associate_df = law_df %>% 
+  filter(rank == "Associate")
+
+full_pro_df = law_df %>% 
+  filter(rank == "Full professor")
+```
+
 

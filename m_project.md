@@ -510,3 +510,6 @@ plot(male_model_new)
 ```
 
 <img src="m_project_files/figure-gfm/unnamed-chunk-6-1.png" width="90%" />
+
+now the model seems good. the two models are `female_model` and
+`male_model_new`.
