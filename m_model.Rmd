@@ -38,11 +38,11 @@ law = read_csv("./data/Lawsuit.csv") %>%
 
 law_df = law %>%
   mutate(Gender = factor(Gender, levels = c(0,1), labels = c("Female", "Male")),
-         Dept = factor(Dept, levels = c(6,1,2,3,4,5), 
-                       labels = c("Surgery", "Biochemistry/Molecular Biology", "Physiology", "Genetics", "Pediatrics", "Medicine")),
+         Dept = factor(Dept, levels = c(1,2,3,4,5,6), 
+                       labels = c("Biochemistry/Molecular Biology", "Physiology", "Genetics", "Pediatrics", "Medicine", "Surgery")),
          Clin = factor(Clin, levels = c(0,1), labels = c("Primarily research emphasis", "Primarily clinical emphasis")),
          Cert = factor(Cert, levels = c(0,1), labels = c("not certified", "Board certified")),
-         Rank = factor(Rank, levels = c(3,1,2), labels = c("Full professor", "Assistant", "Associate")))
+         Rank = factor(Rank, levels = c(1,2,3), labels = c("Assistant", "Associate","Full professor")))
 
 my_labels <- list(Dept = "Department", Gender = "Gender", Clin = "Research/Clinical emphasis", Cert = "Not/Board Certificated", Prate = "Publication rate", Exper = "Experience(years)", Rank = "Title", Sal = "Average Salary in 1994-1995")
 
@@ -64,12 +64,14 @@ tab1 = tableby(Gender ~ Dept + Clin + Cert + Prate + Exper + Rank + Sal, data = 
 
 tab1 %>% knitr::kable(format = "html")
 ```
-
 # Transformation
 ```{r}
 attach(law)
 pairs(law)
 cor_mat = round(cor(law),2)
+cor_mat %>% knitr::kable(format = "html")
+
+#There is collinearity between prate and dept, prate and clin, we can remove prate.
 
 sal_log = log(law$Sal)
 
@@ -86,11 +88,11 @@ law_df = read_csv("./data/Lawsuit.csv") %>%
   janitor::clean_names() %>% 
   mutate(mean_sal = log((sal94 + sal95)/2)) %>%
   mutate(gender = factor(gender, levels = c(0,1), labels = c("Female", "Male")),
-         dept = factor(dept, levels = c(6,1,2,3,4,5), 
-                       labels = c("Surgery", "Biochemistry/Molecular Biology", "Physiology", "Genetics", "Pediatrics", "Medicine")),
+         dept = factor(dept, levels = c(1,2,3,4,5,6), 
+                       labels = c("Biochemistry/Molecular Biology", "Physiology", "Genetics", "Pediatrics", "Medicine", "Surgery")),
          clin = factor(clin, levels = c(0,1), labels = c("Primarily research emphasis", "Primarily clinical emphasis")),
          cert = factor(cert, levels = c(0,1), labels = c("not certified", "Board certified")),
-         rank = factor(rank, levels = c(3,1,2), labels = c("Full professor", "Assistant", "Associate")))
+         rank = factor(rank, levels = c(1,2,3), labels = c("Assistant", "Associate","Full professor")))
 
 ```
 
@@ -125,20 +127,9 @@ summary(model_rank1)
 
 summary(model_rank2)
 
-# rank is not a confounder, but probabaly a modifier.
+# rank is a confounder, and a modifier.
 ```
 
-```{r prate}
-model_prate1 = lm(mean_sal~gender + prate, data = law_df)
-
-model_prate2 = lm(mean_sal~gender*prate, data = law_df)
-
-summary(model_prate1)
-
-summary(model_prate2)
-
-# prate is a confounder, not a modifier and should be included in the model
-```
 
 ```{r exper}
 model_exper1 = lm(mean_sal~gender + exper, data = law_df)
@@ -179,87 +170,36 @@ summary(model_cert2)
 
 ## Finally fit new model and diagnostic
 ```{r}
-mult_fit = lm(mean_sal ~ dept + gender + cert + exper + clin + prate + rank, data = law_df)
+mult_fit = lm(mean_sal ~ gender*rank + cert + exper + clin + dept, data = law_df)
 
 summary(mult_fit)
 
-model_new = lm(mean_sal~gender + cert + exper + dept + clin + prate, data = law_df)
-
-summary(model_new)
-
-#rank is associated with gender, and if we include rank in the model, gender become insignificant. rank is probably in the casual pathway between gender and salary.
-
-HH::vif(model_new)
-
-#There is collinearity between prate and dept, prate and clin, we can remove prate.
-
-model_diag = lm(mean_sal~gender + cert + exper + dept + clin, data = law_df)
-
-summary(model_diag)
-
-HH::vif(model_diag)
+HH::vif(mult_fit)
 
 ```
-
-partition the data by rank
-
-```{r}
-law_df = law_df %>% 
-  mutate(log_mean_sal = log(mean_sal))
-
-assistant_df = law_df %>% 
-  filter(rank == "Assistant")
-
-associate_df = law_df %>% 
-  filter(rank == "Associate")
-
-full_pro_df = law_df %>% 
-  filter(rank == "Full professor")
-```
-
-
-```{r}
-assistant_model = lm(log_mean_sal~gender + cert + exper + dept + clin, data = assistant_df)
-
-summary(assistant_model)
-
-associate_model = lm(log_mean_sal~gender + cert + exper + dept + clin, data = associate_df)
-
-summary(associate_model)
-
-fullprof_model = lm(log_mean_sal~gender + cert + exper + dept + clin, data = full_pro_df)
-
-summary(fullprof_model)
-```
-
-
-
 
 # Outliers/influential points
 ```{r}
-state_res = rstandard(model_diag)
-state_hat = hatvalues(model_diag)
+state_res = rstandard(mult_fit)
+state_hat = hatvalues(mult_fit)
 outliers_x = state_hat[state_hat > 0.2]
 outliers_x
 outliers_y = state_res[abs(state_res) > 2.5]
 outliers_y
 
-influence.measures(model_diag)
+# there is no outlier in X, outliers in Y are obs 122, 184, 208
+
 par(mfrow = c(2,2))
-plot(model_diag)
+plot(mult_fit)
+
+# obs 184 is influencial point
 
 #Remove observations 184
 law_df_no184 = law_df[-184,]
 model_no184 = lm(mean_sal~gender + cert + exper + dept + clin, data = law_df_no184)
 summary(law_df_no184)
 
-summary(model_no184)
-
 #Check the model assumptions
 par(mfrow = c(2,2))
 plot(model_no184)
 ```
-
-
-
-
