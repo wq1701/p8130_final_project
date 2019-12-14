@@ -24,6 +24,8 @@ library(tidyverse)
 
 # 常见： experience, rank
 # 存在： publication rate, department
+
+# 20191213 update: rank 不应该被移除，可以考虑partition做regression
 ```
 
 ```{r}
@@ -45,33 +47,6 @@ law_df = read_csv("./data/Lawsuit.csv") %>%
          rank = factor(rank, levels = c(3,1,2), labels = c("Full professor", "Assistant", "Associate")))
 ```
 
-```{r}
-# plots
-
-law_df %>% 
-  ggplot() + 
-  geom_boxplot(aes(x = dept, y = mean_sal, fill = gender))
-
-law_df %>% 
-  ggplot() + 
-  geom_boxplot(aes(x = clin, y = mean_sal, fill = gender))
-
-law_df %>% 
-  ggplot() + 
-  geom_boxplot(aes(x = cert, y = mean_sal, fill = gender))
-
-law_df %>% 
-  ggplot() + 
-  geom_point(aes(x = prate, y = mean_sal, color = gender))
-
-law_df %>% 
-  ggplot() + 
-  geom_point(aes(x = exper, y = mean_sal, color = gender))
-
-law_df %>% 
-  ggplot() + 
-  geom_boxplot(aes(x = rank, y = mean_sal, fill = gender))
-```
 
 ```{r}
 # transfrom mean_sal
@@ -120,8 +95,9 @@ model_rank = lm(log_mean_sal~gender + rank, data = law_df)
 
 summary(model_rank)
 
-# coefficients change from 0.38530 to 0.34948, 
-# not a confounder
+# coefficients change from 0.38530 to 0.34948, about 10% 
+# also according to some literature reviews, 
+# it should be included in the model
 ```
 
 ```{r prate confd}
@@ -157,15 +133,14 @@ model_cert %>% summary()
 ```
 
 
-therefore, we conclude that variables `dept`, `prate`, `clin`, `cert` and `exper` should be included in the model as confounders, they should be included in the model to adjust for the main predictor `gender`. `rank` is left. 
+therefore, we conclude that variables `dept`, `prate`, `clin`, `cert`, `rank` and `exper` should be included in the model as confounders, they should be included in the model to adjust for the main predictor `gender`. 
 
 Now the model we have is: 
 
 ```{r}
-model_1 = lm(log_mean_sal~gender + dept + prate + clin + cert + exper, data = law_df)
-
+model_1 = lm(log_mean_sal~gender + dept + rank + clin + cert + exper, data = law_df)
+summary(model_1)
 ```
-
 
 next we consider interaction terms. 
 
@@ -187,8 +162,7 @@ assistant_df = law_df %>%
 associate_df = law_df %>% 
   filter(rank == "Associate")
 
-full_pro_df = law_df %>% 
+full_prof_df = law_df %>% 
   filter(rank == "Full professor")
 ```
-
 
