@@ -1,0 +1,56 @@
+---
+title: "visualization"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+law_df = read_csv("./data/Lawsuit.csv") %>% 
+  janitor::clean_names() %>% 
+  mutate(mean_sal = (sal94 + sal95)/2) %>% 
+  mutate(
+    gender = as.factor(gender),
+    dept = as.factor(dept),
+    clin = as.factor(clin),
+    cert = as.factor(cert),
+    rank = as.factor(rank)
+  ) %>% 
+  mutate(gender = factor(gender, levels = c(0,1), labels = c("Female", "Male")),
+         dept = factor(dept, levels = c(6,1,2,3,4,5), 
+                       labels = c("Surgery", "Biochemistry/Molecular Biology", "Physiology", "Genetics", "Pediatrics", "Medicine")),
+         clin = factor(clin, levels = c(0,1), labels = c("Primarily research emphasis", "Primarily clinical emphasis")),
+         cert = factor(cert, levels = c(0,1), labels = c("not certified", "Board certified")),
+         rank = factor(rank, levels = c(3,1,2), labels = c("Full professor", "Assistant", "Associate")))
+```
+
+```{r}
+# plots
+
+law_df %>% 
+  ggplot() + 
+  geom_boxplot(aes(x = dept, y = mean_sal, fill = gender))
+
+law_df %>% 
+  ggplot() + 
+  geom_boxplot(aes(x = clin, y = mean_sal, fill = gender))
+
+law_df %>% 
+  ggplot() + 
+  geom_boxplot(aes(x = cert, y = mean_sal, fill = gender))
+
+law_df %>% 
+  ggplot() + 
+  geom_point(aes(x = prate, y = mean_sal, color = gender))
+
+law_df %>% 
+  ggplot() + 
+  geom_point(aes(x = exper, y = mean_sal, color = gender))
+
+law_df %>% 
+  ggplot() + 
+  geom_boxplot(aes(x = rank, y = mean_sal, fill = gender))
+```
