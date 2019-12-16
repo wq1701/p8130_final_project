@@ -20,11 +20,11 @@ law_df = read_csv("./data/Lawsuit.csv") %>%
     rank = as.factor(rank)
   ) %>% 
   mutate(gender = factor(gender, levels = c(0,1), labels = c("Female", "Male")),
-         dept = factor(dept, levels = c(6,1,2,3,4,5), 
-                       labels = c("Surgery", "Biochemistry/Molecular Biology", "Physiology", "Genetics", "Pediatrics", "Medicine")),
+         dept = factor(dept, levels = c(1,2,3,4,5,6), 
+                       labels = c("Biochemistry/Molecular Biology", "Physiology", "Genetics", "Pediatrics", "Medicine", "Surgery")),
          clin = factor(clin, levels = c(0,1), labels = c("Primarily research emphasis", "Primarily clinical emphasis")),
          cert = factor(cert, levels = c(0,1), labels = c("not certified", "Board certified")),
-         rank = factor(rank, levels = c(3,1,2), labels = c("Full professor", "Assistant", "Associate")))
+         rank = factor(rank, levels = c(1,2,3), labels = c("Assistant", "Associate","Full professor")))
 ```
 
 ```{r}
@@ -52,5 +52,6 @@ law_df %>%
 
 law_df %>% 
   ggplot() + 
-  geom_boxplot(aes(x = rank, y = mean_sal, fill = gender))
+  geom_boxplot(aes(x = rank, y = mean_sal, fill = gender)) + 
+  labs(title = "Mean salary of 1994 and 1995", x = "Rank", y = "Mean salary")
 ```

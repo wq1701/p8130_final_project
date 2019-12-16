@@ -15,21 +15,28 @@ sal_df = read_csv("./data/Lawsuit.csv") %>%
   mutate(log_sal94 = log(sal94), 
          log_sal95 = log(sal95)) %>% 
   mutate(gender = as.factor(gender), 
+         rank = as.factor(rank),
          dept = as.factor(dept), 
          clin = as.factor(clin), 
          cert = as.factor(cert), 
-         prate = as.factor(prate))
+         prate = as.factor(prate)) %>% 
+  mutate(gender = factor(gender, levels = c(0,1), labels = c("Female", "Male")),
+         dept = factor(dept, levels = c(1,2,3,4,5,6), 
+                       labels = c("Biochemistry/Molecular Biology", "Physiology", "Genetics", "Pediatrics", "Medicine", "Surgery")),
+         clin = factor(clin, levels = c(0,1), labels = c("Primarily research emphasis", "Primarily clinical emphasis")),
+         cert = factor(cert, levels = c(0,1), labels = c("not certified", "Board certified")),
+         rank = factor(rank, levels = c(1,2,3), labels = c("Assistant", "Associate","Full professor")))
 ```
 
 ```{r}
 # based on previous experience, fit 94 with gender, dept, exper, clin, cert
 # prate is removed based on experience
-sal_94_model = lm(log_sal94 ~ gender + rank + dept + exper + clin + cert, data = sal_df)
+sal_94_model = lm(log_sal94 ~ gender + rank + dept + exper + cert, data = sal_df)
 summary(sal_94_model)
 ```
 
 ```{r}
-sal_95_model = lm(log_sal95 ~ gender + dept + exper + clin + cert, data = sal_df)
+sal_95_model = lm(log_sal95 ~ gender + dept + exper + cert, data = sal_df)
 summary(sal_95_model)
 ```
 
@@ -42,28 +49,24 @@ try pratition by rank
 
 # gender significant for assistant 94 model
 assistant_df = sal_df %>% 
-  filter(rank == 1)
-assistant_94_model = lm(log_sal94 ~ gender + dept + exper + clin + cert, data = assistant_df)
+  filter(rank == "Assistant")
+assistant_94_model = lm(log_sal94 ~ gender + dept + exper + cert, data = assistant_df)
 summary(assistant_94_model)
 
 # gender not significant for associate 94 model
 associate_df = sal_df %>% 
-  filter(rank == 2)
-associate_94_model = lm(log_sal94 ~gender + dept + exper + clin + cert, data = associate_df)
+  filter(rank == "Associate")
+associate_94_model = lm(log_sal94 ~gender + dept + exper + cert, data = associate_df)
 summary(associate_94_model)
 
 # gender not significant for full professor 94 model
 fullp_df = sal_df %>% 
-  filter(rank == 3)
-fullp_94_model = lm(log_sal94 ~gender + dept + exper + clin + cert, data = fullp_df)
+  filter(rank == "Full professor")
+fullp_94_model = lm(log_sal94 ~gender + dept + exper + cert, data = fullp_df)
 summary(fullp_94_model)
 ```
 
 ```{r}
-# anova test
-inter_94_model = lm(log_sal94 ~ gender*rank + dept + exper + clin + cert, data = sal_df)
-anova(sal_94_model, inter_94_model)
 
-inter_full_model = lm(log_sal94 ~ gender*rank + dept + exper + clin + cert, data = fullp_df)
 ```
 

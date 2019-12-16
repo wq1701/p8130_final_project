@@ -196,10 +196,33 @@ plot(mult_fit)
 
 #Remove observations 184
 law_df_no184 = law_df[-184,]
-model_no184 = lm(mean_sal~gender + cert + exper + dept + clin, data = law_df_no184)
-summary(law_df_no184)
+model_no184 = lm(mean_sal ~ gender + cert + exper + clin + dept, data = law_df_no184)
+summary(model_no184)
 
 #Check the model assumptions
 par(mfrow = c(2,2))
 plot(model_no184)
 ```
+
+```{r}
+# strata analysis for assistant professor
+ast_df = law_df %>% 
+  filter(rank == "Assistant")
+
+ast_model = lm(mean_sal ~ gender +clin + dept + cert + exper, data = ast_df)
+summary(ast_model)
+
+ast_df %>% 
+  group_by(gender) %>% 
+  summarise(mean_sal_by_gender = mean(mean_sal))
+```
+
+```{r}
+# strata for full prof
+fp_df = law_df %>% 
+  filter(rank == "Full professor")
+
+fp_model = lm(mean_sal ~ gender + cert + exper + clin + dept, data = fp_df)
+summary(fp_model)
+```
+

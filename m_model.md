@@ -1564,37 +1564,36 @@ plot(mult_fit)
 #Remove observations 184
 law_df_no184 = law_df[-184,]
 model_no184 = lm(mean_sal~gender + cert + exper + dept + clin, data = law_df_no184)
-summary(law_df_no184)
+summary(model_no184)
 ```
 
-    ##        id                                     dept       gender   
-    ##  Min.   :  1.00   Biochemistry/Molecular Biology:50   Female:106  
-    ##  1st Qu.: 65.75   Physiology                    :40   Male  :154  
-    ##  Median :130.50   Genetics                      :21               
-    ##  Mean   :130.80   Pediatrics                    :30               
-    ##  3rd Qu.:196.25   Medicine                      :79               
-    ##  Max.   :261.00   Surgery                       :40               
-    ##                           clin                  cert         prate      
-    ##  Primarily research emphasis:100   not certified  : 72   Min.   :1.300  
-    ##  Primarily clinical emphasis:160   Board certified:188   1st Qu.:3.200  
-    ##                                                          Median :4.400  
-    ##                                                          Mean   :4.932  
-    ##                                                          3rd Qu.:6.925  
-    ##                                                          Max.   :8.700  
-    ##      exper                   rank         sal94            sal95       
-    ##  Min.   : 1.00   Assistant     :111   Min.   : 34514   Min.   : 38675  
-    ##  1st Qu.: 6.00   Associate     : 64   1st Qu.: 90736   1st Qu.: 99855  
-    ##  Median : 9.00   Full professor: 85   Median :133191   Median :147722  
-    ##  Mean   :10.26                        Mean   :153223   Mean   :168494  
-    ##  3rd Qu.:14.00                        3rd Qu.:197664   3rd Qu.:217847  
-    ##  Max.   :37.00                        Max.   :428876   Max.   :472589  
-    ##     mean_sal    
-    ##  Min.   :10.51  
-    ##  1st Qu.:11.46  
-    ##  Median :11.86  
-    ##  Mean   :11.86  
-    ##  3rd Qu.:12.25  
-    ##  Max.   :13.01
+    ## 
+    ## Call:
+    ## lm(formula = mean_sal ~ gender + cert + exper + dept + clin, 
+    ##     data = law_df_no184)
+    ## 
+    ## Residuals:
+    ##      Min       1Q   Median       3Q      Max 
+    ## -0.37774 -0.09219  0.00776  0.08804  0.36024 
+    ## 
+    ## Coefficients:
+    ##                                  Estimate Std. Error t value Pr(>|t|)    
+    ## (Intercept)                     10.966046   0.028533 384.326  < 2e-16 ***
+    ## genderMale                       0.057108   0.020105   2.841  0.00487 ** 
+    ## certBoard certified              0.197069   0.022342   8.821  < 2e-16 ***
+    ## exper                            0.027385   0.001576  17.381  < 2e-16 ***
+    ## deptPhysiology                  -0.166210   0.030714  -5.411 1.46e-07 ***
+    ## deptGenetics                     0.180731   0.038556   4.687 4.55e-06 ***
+    ## deptPediatrics                   0.182078   0.037626   4.839 2.28e-06 ***
+    ## deptMedicine                     0.497833   0.031359  15.875  < 2e-16 ***
+    ## deptSurgery                      0.886955   0.037406  23.711  < 2e-16 ***
+    ## clinPrimarily clinical emphasis  0.225069   0.023249   9.681  < 2e-16 ***
+    ## ---
+    ## Signif. codes:  0 '***' 0.001 '**' 0.01 '*' 0.05 '.' 0.1 ' ' 1
+    ## 
+    ## Residual standard error: 0.1412 on 250 degrees of freedom
+    ## Multiple R-squared:  0.9255, Adjusted R-squared:  0.9229 
+    ## F-statistic: 345.3 on 9 and 250 DF,  p-value: < 2.2e-16
 
 ``` r
 #Check the model assumptions

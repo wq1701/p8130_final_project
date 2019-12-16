@@ -156,7 +156,7 @@ anova(model_1, inter_model) %>% broom::tidy()
 From the result, we notice that the p-value of interaction term is small. We should consider partition the data by rank. 
 
 ```{r}
-assistant_df = law_df %>% 
+ast_df = law_df %>% 
   filter(rank == "Assistant")
 
 associate_df = law_df %>% 
@@ -165,4 +165,19 @@ associate_df = law_df %>%
 full_prof_df = law_df %>% 
   filter(rank == "Full professor")
 ```
+
+```{r}
+ast_model = lm(log_mean_sal~gender + dept + prate + clin + cert + exper, data = ast_df)
+
+ast_model %>% broom::tidy()
+
+summary(ast_model)
+```
+
+```{r}
+asc_model = lm(log_mean_sal~gender + dept + prate + clin + cert + exper, data = associate_df)
+
+summary(asc_model)
+```
+
 
